@@ -7,12 +7,13 @@ type ItemInput = {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { merchant_id: string } },
+  { params }: { params: Promise<{ merchant_id: string }> },
 ) {
+  const { merchant_id } = await params;
   const requestId = request.headers.get("Request-Id") ?? undefined;
   const idempotencyKey = request.headers.get("Idempotency-Key") ?? undefined;
 
-  console.log("params", params);
+  console.log("merchant_id", merchant_id);
 
   let items: ItemInput[] = [];
   try {

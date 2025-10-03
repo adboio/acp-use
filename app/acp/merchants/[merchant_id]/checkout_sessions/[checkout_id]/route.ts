@@ -2,10 +2,13 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { merchant_id: string; checkout_id: string } },
+  { params }: { params: Promise<{ merchant_id: string; checkout_id: string }> },
 ) {
+  const { merchant_id, checkout_id } = await params;
   const requestId = request.headers.get("Request-Id") ?? undefined;
   const idempotencyKey = request.headers.get("Idempotency-Key") ?? undefined;
+
+  console.log("merchant_id", merchant_id);
 
   const currency = "usd";
   const unitBaseAmount = 1500; // $15.00 in minor units
@@ -36,7 +39,7 @@ export async function GET(
   const fee = 0;
 
   const checkout_session = {
-    id: params.checkout_id,
+    id: checkout_id,
     buyer: undefined,
     payment_provider: {
       provider: "stripe",

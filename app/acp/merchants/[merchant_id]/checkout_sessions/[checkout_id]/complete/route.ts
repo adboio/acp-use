@@ -2,14 +2,17 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { merchant_id: string; checkout_id: string } },
+  { params }: { params: Promise<{ merchant_id: string; checkout_id: string }> },
 ) {
+  const { merchant_id, checkout_id } = await params;
   const requestId = request.headers.get("Request-Id") ?? undefined;
   const idempotencyKey = request.headers.get("Idempotency-Key") ?? undefined;
 
+  console.log("merchant_id", merchant_id);
+
   // Mock implementation for completing a checkout session
   const completed_session = {
-    id: params.checkout_id,
+    id: checkout_id,
     status: "completed",
     completed_at: new Date().toISOString(),
     payment_intent: {
