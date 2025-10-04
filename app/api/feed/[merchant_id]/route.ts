@@ -5,7 +5,7 @@ import { oauthManager } from "@/lib/oauth/manager";
 // This provides available products for purchase from connected platforms
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ merchant_id: string }> }
+  { params }: { params: Promise<{ merchant_id: string }> },
 ) {
   let products: any[] = [];
   let merchantInfo = null;
@@ -13,9 +13,9 @@ export async function GET(
   try {
     // Get merchant ID from URL parameter
     const { merchant_id: merchantId } = await params;
-    
+
     console.log("🤖 [FEED] Fetching products for merchant:", merchantId);
-    
+
     // Get all connected OAuth connections for this merchant
     const connections = await oauthManager.getConnections(merchantId);
     console.log("🤖 [FEED] Found connections:", connections.length);
@@ -24,25 +24,36 @@ export async function GET(
     for (const connection of connections) {
       try {
         console.log(`🤖 [FEED] Processing connection: ${connection.provider}`);
-        
+
         const provider = oauthManager.getProvider(connection.provider as any);
         if (!provider || !provider.getProducts) {
-          console.log(`🤖 [FEED] Provider ${connection.provider} doesn't support product fetching`);
+          console.log(
+            `🤖 [FEED] Provider ${connection.provider} doesn't support product fetching`,
+          );
           continue;
         }
 
         // Check if token is expired and refresh if needed
         let accessToken = connection.tokens.accessToken;
-        if (connection.tokens.expiresAt && connection.tokens.expiresAt < new Date()) {
-          console.log(`🤖 [FEED] Token expired for ${connection.provider}, refreshing...`);
-          const refreshedConnection = await oauthManager.refreshConnection(connection.id);
+        if (
+          connection.tokens.expiresAt &&
+          connection.tokens.expiresAt < new Date()
+        ) {
+          console.log(
+            `🤖 [FEED] Token expired for ${connection.provider}, refreshing...`,
+          );
+          const refreshedConnection = await oauthManager.refreshConnection(
+            connection.id,
+          );
           accessToken = refreshedConnection.tokens.accessToken;
         }
 
         // Fetch products from this provider
         const providerProducts = await provider.getProducts(accessToken);
-        console.log(`🤖 [FEED] Fetched ${providerProducts.length} products from ${connection.provider}`);
-        
+        console.log(
+          `🤖 [FEED] Fetched ${providerProducts.length} products from ${connection.provider}`,
+        );
+
         products.push(...providerProducts);
 
         // Use the first connection's merchant info for the feed metadata
@@ -55,14 +66,19 @@ export async function GET(
           };
         }
       } catch (error) {
-        console.error(`🤖 [FEED] Error fetching products from ${connection.provider}:`, error);
+        console.error(
+          `🤖 [FEED] Error fetching products from ${connection.provider}:`,
+          error,
+        );
         // Continue with other connections even if one fails
       }
     }
 
     // If no products were found from connected platforms, use mock data
     if (products.length === 0) {
-      console.log("🤖 [FEED] No products found from connected platforms, using mock data");
+      console.log(
+        "🤖 [FEED] No products found from connected platforms, using mock data",
+      );
       products = [
         {
           id: "product_laptop_001",
@@ -181,7 +197,10 @@ export async function GET(
       id: merchantInfo.id,
       name: merchantInfo.name,
       description: merchantInfo.description,
-      website: merchantInfo.platform === "square" ? "https://squareup.com" : "https://example.com",
+      website:
+        merchantInfo.platform === "square"
+          ? "https://squareup.com"
+          : "https://example.com",
       logo: "https://via.placeholder.com/100x100?text=Store",
       address: "Connected Store",
       phone: "N/A",

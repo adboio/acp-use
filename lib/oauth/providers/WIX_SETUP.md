@@ -64,6 +64,7 @@ The Wix OAuth provider is automatically registered when the required environment
 ## Error Handling
 
 The provider includes comprehensive error handling for:
+
 - Invalid authorization codes
 - Expired tokens
 - Network errors

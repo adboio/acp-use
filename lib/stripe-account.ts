@@ -4,7 +4,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-09-30.clover",
 });
 
-
 export type ConnectedAccountStatus = {
   connected: boolean;
   account_id?: string;

@@ -10,7 +10,14 @@ export async function POST(request: NextRequest) {
   console.log("🔗 [STRIPE-SPT] Creating Shared Payment Token...");
 
   try {
-    const { payment_method_id, setup_intent_id, amount, currency, merchant_id, stripe_account_id } = await request.json();
+    const {
+      payment_method_id,
+      setup_intent_id,
+      amount,
+      currency,
+      merchant_id,
+      stripe_account_id,
+    } = await request.json();
     console.log("🔗 [STRIPE-SPT] Request data:", {
       payment_method_id,
       setup_intent_id,
@@ -22,12 +29,12 @@ export async function POST(request: NextRequest) {
 
     // Get payment method ID - either directly provided or from setup intent
     let paymentMethodId = payment_method_id;
-    
+
     if (!paymentMethodId && setup_intent_id) {
       // Fallback: retrieve from setup intent if payment method ID not provided
       const setupIntent = await stripe.setupIntents.retrieve(setup_intent_id);
       console.log("🔗 [STRIPE-SPT] Retrieved SetupIntent:", setupIntent.id);
-      
+
       if (!setupIntent.payment_method) {
         throw new Error("No payment method found on SetupIntent");
       }
@@ -47,9 +54,12 @@ export async function POST(request: NextRequest) {
         .select("stripe_account_id")
         .eq("id", merchant_id)
         .single();
-      
+
       connectedAccountId = merchant?.stripe_account_id || null;
-      console.log("🔗 [STRIPE-SPT] Merchant Stripe account:", connectedAccountId);
+      console.log(
+        "🔗 [STRIPE-SPT] Merchant Stripe account:",
+        connectedAccountId,
+      );
     }
 
     if (!connectedAccountId) {

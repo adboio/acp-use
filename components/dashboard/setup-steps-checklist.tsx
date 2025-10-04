@@ -1,10 +1,22 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, CreditCard, Link as LinkIcon, Loader2 } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  CreditCard,
+  Link as LinkIcon,
+  Loader2,
+} from "lucide-react";
 import { OAuthConnection } from "@/lib/oauth/types";
 import Link from "next/link";
 import { CommerceEndpointsSection } from "./commerce-endpoints-section";
@@ -28,7 +40,7 @@ export function SetupStepsChecklist({ merchantId }: SetupStepsChecklistProps) {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       // Fetch connections
       const connectionsRes = await fetch(
         `/api/oauth/connections?merchant_id=${merchantId}`,
@@ -63,7 +75,15 @@ export function SetupStepsChecklist({ merchantId }: SetupStepsChecklistProps) {
       });
       const json = await res.json();
       if (json.account) {
-        setStripeStatus(prev => prev ? { ...prev, connected: true } : { connected: true, onboarding_complete: false, missing_information_count: 0 });
+        setStripeStatus((prev) =>
+          prev
+            ? { ...prev, connected: true }
+            : {
+                connected: true,
+                onboarding_complete: false,
+                missing_information_count: 0,
+              },
+        );
       }
     } catch (e) {
       console.error("Could not create connected account:", e);
@@ -86,8 +106,9 @@ export function SetupStepsChecklist({ merchantId }: SetupStepsChecklistProps) {
     }
   };
 
-
-  const connectedPlatforms = connections.filter(c => c.status === "connected").length;
+  const connectedPlatforms = connections.filter(
+    (c) => c.status === "connected",
+  ).length;
   const hasConnectedPlatform = connectedPlatforms > 0;
   const isStripeConnected = stripeStatus?.connected || false;
   const isStripeOnboarded = stripeStatus?.onboarding_complete || false;
@@ -107,7 +128,12 @@ export function SetupStepsChecklist({ merchantId }: SetupStepsChecklistProps) {
   }
 
   if (isSetupComplete) {
-    return <CommerceEndpointsSection merchantId={merchantId} baseUrl='https://www.acp-use.com' />;
+    return (
+      <CommerceEndpointsSection
+        merchantId={merchantId}
+        baseUrl="https://www.acp-use.com"
+      />
+    );
   }
 
   return (
@@ -115,9 +141,12 @@ export function SetupStepsChecklist({ merchantId }: SetupStepsChecklistProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg text-amber-800">Complete Your Setup</CardTitle>
+            <CardTitle className="text-lg text-amber-800">
+              Complete Your Setup
+            </CardTitle>
             <CardDescription className="text-amber-700">
-              Finish these steps to start accepting payments and managing your business.
+              Finish these steps to start accepting payments and managing your
+              business.
             </CardDescription>
           </div>
           <Badge variant="outline" className="border-amber-300 text-amber-800">
@@ -140,10 +169,9 @@ export function SetupStepsChecklist({ merchantId }: SetupStepsChecklistProps) {
                   Connect a Platform
                 </div>
                 <div className="text-sm text-gray-600">
-                  {hasConnectedPlatform 
-                    ? `${connectedPlatforms} platform${connectedPlatforms === 1 ? '' : 's'} connected`
-                    : "Connect Square, Gumroad, or Wix to sync your products and orders"
-                  }
+                  {hasConnectedPlatform
+                    ? `${connectedPlatforms} platform${connectedPlatforms === 1 ? "" : "s"} connected`
+                    : "Connect Square, Gumroad, or Wix to sync your products and orders"}
                 </div>
               </div>
             </div>
@@ -180,12 +208,11 @@ export function SetupStepsChecklist({ merchantId }: SetupStepsChecklistProps) {
                   Complete Stripe Onboarding
                 </div>
                 <div className="text-sm text-gray-600">
-                  {isStripeOnboarded 
+                  {isStripeOnboarded
                     ? "Payment processing is active and ready"
-                    : isStripeConnected 
+                    : isStripeConnected
                       ? "Complete your Stripe account setup to accept payments"
-                      : "Set up Stripe to process payments and receive payouts"
-                  }
+                      : "Set up Stripe to process payments and receive payouts"}
                 </div>
               </div>
             </div>

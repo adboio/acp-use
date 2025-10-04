@@ -1,7 +1,13 @@
 "use client";
 
 import { ConnectionManager } from "@/components/oauth/connection-manager";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
@@ -18,7 +24,8 @@ export function ConnectionsSection({ merchantId }: ConnectionsSectionProps) {
           <div>
             <CardTitle className="text-xl">Connected Services</CardTitle>
             <CardDescription>
-              Manage your integrations with Square, Gumroad, Wix, and other platforms
+              Manage your integrations with Square, Gumroad, Wix, and other
+              platforms
             </CardDescription>
           </div>
           <Button asChild variant="outline" size="sm">

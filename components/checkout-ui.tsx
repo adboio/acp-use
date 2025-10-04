@@ -55,7 +55,7 @@ function CheckoutForm({
     try {
       // Create payment method directly from card element
       const { error, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
+        type: "card",
         card: elements.getElement(CardElement)!,
         billing_details: {
           email: checkoutSession.contact?.email,
@@ -89,7 +89,8 @@ function CheckoutForm({
         },
       );
 
-      const { shared_payment_token, status: paymentStatus } = await tokenResponse.json();
+      const { shared_payment_token, status: paymentStatus } =
+        await tokenResponse.json();
 
       if (!shared_payment_token) {
         throw new Error("Failed to create payment");
@@ -101,7 +102,9 @@ function CheckoutForm({
         onComplete(shared_payment_token);
       } else if (paymentStatus === "requires_action") {
         // Handle 3D Secure or other authentication requirements
-        throw new Error("Payment requires additional authentication. Please try a different card.");
+        throw new Error(
+          "Payment requires additional authentication. Please try a different card.",
+        );
       } else {
         throw new Error(`Payment failed with status: ${paymentStatus}`);
       }
@@ -177,14 +180,14 @@ function CheckoutForm({
                 options={{
                   style: {
                     base: {
-                      fontSize: '16px',
-                      color: '#424770',
-                      '::placeholder': {
-                        color: '#aab7c4',
+                      fontSize: "16px",
+                      color: "#424770",
+                      "::placeholder": {
+                        color: "#aab7c4",
                       },
                     },
                     invalid: {
-                      color: '#9e2146',
+                      color: "#9e2146",
                     },
                   },
                 }}
@@ -235,7 +238,6 @@ export default function CheckoutUI({
   onComplete,
   onCancel,
 }: CheckoutUIProps) {
-
   // Early return if checkoutSession is not available
   if (!checkoutSession) {
     return (

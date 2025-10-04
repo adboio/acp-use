@@ -41,7 +41,7 @@ export class WixOAuthProvider extends BaseOAuthProvider {
     state: string,
   ): Promise<OAuthTokens> {
     console.log("🤖 [WIX] Exchanging code for tokens:", code, state);
-    
+
     const response = await this.makeRequest(this.config.tokenUrl, {
       method: "POST",
       headers: {
@@ -57,7 +57,7 @@ export class WixOAuthProvider extends BaseOAuthProvider {
     });
 
     const data = await response.json();
-    
+
     console.log("🤖 [WIX] Token response data:", JSON.stringify(data, null, 2));
 
     if (data.error) {
@@ -77,7 +77,7 @@ export class WixOAuthProvider extends BaseOAuthProvider {
 
   async refreshAccessToken(refreshToken: string): Promise<OAuthTokens> {
     console.log("🤖 [WIX] Refreshing access token:", refreshToken);
-    
+
     const response = await this.makeRequest(this.config.tokenUrl, {
       method: "POST",
       headers: {
@@ -130,11 +130,14 @@ export class WixOAuthProvider extends BaseOAuthProvider {
 
   async getUserInfo(accessToken: string): Promise<OAuthUserInfo> {
     // Get app instance information from Wix
-    const response = await this.makeRequest("https://www.wixapis.com/v1/apps/me", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const response = await this.makeRequest(
+      "https://www.wixapis.com/v1/apps/me",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
     const data = await response.json();
 

@@ -12,7 +12,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ user }: DashboardHeaderProps) {
   const pathname = usePathname();
-  
+
   const isActive = (path: string) => {
     if (path === "/dashboard") {
       return pathname === "/dashboard";
@@ -32,10 +32,10 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
               </div> */}
               <span className="text-xl font-bold text-gray-900">acp-use</span>
             </Link>
-            
+
             <nav className="hidden md:flex space-x-6">
-              <Link 
-                href="/dashboard" 
+              <Link
+                href="/dashboard"
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActive("/dashboard")
                     ? "text-orange-600 bg-orange-50"
@@ -44,8 +44,8 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
               >
                 Dashboard
               </Link>
-              <Link 
-                href="/dashboard/connections" 
+              <Link
+                href="/dashboard/connections"
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActive("/dashboard/connections")
                     ? "text-orange-600 bg-orange-50"
@@ -54,8 +54,8 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
               >
                 Connections
               </Link>
-              <Link 
-                href="/demo" 
+              <Link
+                href="/demo"
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActive("/demo")
                     ? "text-orange-600 bg-orange-50"
@@ -75,7 +75,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             <Button variant="ghost" size="icon">
               <Settings className="h-5 w-5" />
             </Button>
-            
+
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">

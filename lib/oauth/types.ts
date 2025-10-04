@@ -56,7 +56,12 @@ export interface OAuthProvider {
 
   // Order Methods (optional - only for providers that support order creation)
   createOrder?(accessToken: string, orderData: any): Promise<any>;
-  updateOrderStatus?(accessToken: string, orderId: string, version: number, status: string): Promise<any>;
+  updateOrderStatus?(
+    accessToken: string,
+    orderId: string,
+    version: number,
+    status: string,
+  ): Promise<any>;
 }
 
 export interface OAuthConnection {
@@ -91,7 +96,12 @@ export class OAuthError extends Error {
   }
 }
 
-export type OAuthProviderName = "square" | "gumroad" | "stripe" | "mindbody" | "wix";
+export type OAuthProviderName =
+  | "square"
+  | "gumroad"
+  | "stripe"
+  | "mindbody"
+  | "wix";
 
 export interface OAuthState {
   merchantId: string;

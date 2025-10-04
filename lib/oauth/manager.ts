@@ -70,10 +70,7 @@ export class OAuthManager {
     }
 
     // Wix Provider
-    if (
-      process.env.NEXT_PUBLIC_WIX_APP_ID &&
-      process.env.WIX_APP_SECRET
-    ) {
+    if (process.env.NEXT_PUBLIC_WIX_APP_ID && process.env.WIX_APP_SECRET) {
       const wixConfig = {
         clientId: process.env.NEXT_PUBLIC_WIX_APP_ID,
         clientSecret: process.env.WIX_APP_SECRET,
@@ -137,8 +134,11 @@ export class OAuthManager {
     }
 
     try {
-      console.log("🤖 [OAUTH MANAGER] Starting OAuth flow for provider:", providerName);
-      
+      console.log(
+        "🤖 [OAUTH MANAGER] Starting OAuth flow for provider:",
+        providerName,
+      );
+
       // Exchange code for tokens
       console.log("🤖 [OAUTH MANAGER] Exchanging code for tokens...");
       const tokens = await provider.exchangeCodeForTokens(code, state);
@@ -282,16 +282,26 @@ export class OAuthManager {
   }): Promise<OAuthConnection> {
     const supabase = await createClient();
 
-    console.log("🤖 [OAUTH MANAGER] Storing connection with tokens:", JSON.stringify(data.tokens, null, 2));
-    
+    console.log(
+      "🤖 [OAUTH MANAGER] Storing connection with tokens:",
+      JSON.stringify(data.tokens, null, 2),
+    );
+
     // Safely handle expiresAt
     let expiresAtString: string | undefined;
     if (data.tokens.expiresAt) {
       try {
         expiresAtString = data.tokens.expiresAt.toISOString();
-        console.log("🤖 [OAUTH MANAGER] Converted expiresAt to ISO string:", expiresAtString);
+        console.log(
+          "🤖 [OAUTH MANAGER] Converted expiresAt to ISO string:",
+          expiresAtString,
+        );
       } catch (error) {
-        console.error("🤖 [OAUTH MANAGER] Error converting expiresAt to ISO string:", data.tokens.expiresAt, error);
+        console.error(
+          "🤖 [OAUTH MANAGER] Error converting expiresAt to ISO string:",
+          data.tokens.expiresAt,
+          error,
+        );
         expiresAtString = undefined;
       }
     }

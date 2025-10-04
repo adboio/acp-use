@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { checkoutSessions } from "../route";
+import { checkoutSessions } from "@/lib/checkout-sessions";
 
 export async function GET(
   request: NextRequest,
@@ -11,8 +11,13 @@ export async function GET(
 
   console.log("🔍 [ACP-GET] Retrieving checkout session:", checkout_id);
   console.log("🔍 [ACP-GET] Merchant:", merchant_id);
-  console.log(`🔍 [ACP-GET] Total sessions in memory: ${checkoutSessions.size}`);
-  console.log(`🔍 [ACP-GET] Available session IDs:`, Array.from(checkoutSessions.keys()));
+  console.log(
+    `🔍 [ACP-GET] Total sessions in memory: ${checkoutSessions.size}`,
+  );
+  console.log(
+    `🔍 [ACP-GET] Available session IDs:`,
+    Array.from(checkoutSessions.keys()),
+  );
 
   // Retrieve the stored checkout session
   const checkout_session = checkoutSessions.get(checkout_id);
@@ -21,11 +26,14 @@ export async function GET(
     console.error("❌ [ACP-GET] Checkout session not found:", checkout_id);
     return NextResponse.json(
       { error: "Checkout session not found" },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
-  console.log("✅ [ACP-GET] Found checkout session:", JSON.stringify(checkout_session, null, 2));
+  console.log(
+    "✅ [ACP-GET] Found checkout session:",
+    JSON.stringify(checkout_session, null, 2),
+  );
 
   const headers = new Headers();
   if (idempotencyKey) headers.set("Idempotency-Key", idempotencyKey);
@@ -65,19 +73,20 @@ export async function POST(
 
   // Get existing checkout session
   const existingSession = checkoutSessions.get(checkout_id);
-  
+
   if (!existingSession) {
     console.error("❌ [ACP-UPDATE] Checkout session not found:", checkout_id);
     return NextResponse.json(
       { error: "Checkout session not found" },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
   // Update the session
   const updated_session = {
     ...existingSession,
-    fulfillment_option_id: updateData.fulfillment_option_id ?? existingSession.fulfillment_option_id,
+    fulfillment_option_id:
+      updateData.fulfillment_option_id ?? existingSession.fulfillment_option_id,
     contact: updateData.contact ?? existingSession.contact,
     notes: updateData.notes ?? existingSession.notes,
     updated_at: new Date().toISOString(),
@@ -85,7 +94,9 @@ export async function POST(
 
   // Store the updated session
   checkoutSessions.set(checkout_id, updated_session);
-  console.log(`📝 [ACP-UPDATE] Updated checkout session ${checkout_id} in memory`);
+  console.log(
+    `📝 [ACP-UPDATE] Updated checkout session ${checkout_id} in memory`,
+  );
 
   const headers = new Headers();
   if (idempotencyKey) headers.set("Idempotency-Key", idempotencyKey);

@@ -1,17 +1,23 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Bot, Brain, Zap, Search } from "lucide-react";
-import { 
-  AreaChart, 
-  Area, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip
+import {
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
 } from "recharts";
 import { useState, useEffect } from "react";
 
@@ -20,43 +26,46 @@ export function AnalyticsSection() {
 
   // Mock analytics data with time series
   const revenueData = [
-    { month: 'Jan', revenue: 8200 },
-    { month: 'Feb', revenue: 9100 },
-    { month: 'Mar', revenue: 8800 },
-    { month: 'Apr', revenue: 10200 },
-    { month: 'May', revenue: 11800 },
-    { month: 'Jun', revenue: 12450 },
+    { month: "Jan", revenue: 8200 },
+    { month: "Feb", revenue: 9100 },
+    { month: "Mar", revenue: 8800 },
+    { month: "Apr", revenue: 10200 },
+    { month: "May", revenue: 11800 },
+    { month: "Jun", revenue: 12450 },
   ];
 
-
   const agentSalesData = [
-    { agent: 'ChatGPT', sales: 5200, orders: 34, color: '#10A37F', icon: Bot },
-    { agent: 'Claude', sales: 3800, orders: 28, color: '#FF6B35', icon: Brain },
-    { agent: 'Gemini', sales: 2100, orders: 18, color: '#4285F4', icon: Zap },
-    { agent: 'Perplexity', sales: 1350, orders: 9, color: '#8B5CF6', icon: Search },
+    { agent: "ChatGPT", sales: 5200, orders: 34, color: "#10A37F", icon: Bot },
+    { agent: "Claude", sales: 3800, orders: 28, color: "#FF6B35", icon: Brain },
+    { agent: "Gemini", sales: 2100, orders: 18, color: "#4285F4", icon: Zap },
+    {
+      agent: "Perplexity",
+      sales: 1350,
+      orders: 9,
+      color: "#8B5CF6",
+      icon: Search,
+    },
   ];
 
   // Transform data for pie chart
-  const pieChartData = agentSalesData.map(agent => ({
+  const pieChartData = agentSalesData.map((agent) => ({
     name: agent.agent,
     value: agent.sales,
     color: agent.color,
     orders: agent.orders,
-    icon: agent.icon
+    icon: agent.icon,
   }));
-
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
-
 
   return (
     <div className="space-y-8">
@@ -90,23 +99,35 @@ export function AnalyticsSection() {
           <Card>
             <CardHeader>
               <CardTitle>Revenue Trend</CardTitle>
-              <CardDescription>Monthly revenue over the last 6 months</CardDescription>
+              <CardDescription>
+                Monthly revenue over the last 6 months
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-80 w-full flex items-center justify-center">
-                <AreaChart width={500} height={300} data={revenueData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <AreaChart
+                  width={500}
+                  height={300}
+                  data={revenueData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
-                  <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                  <Tooltip 
-                    formatter={(value) => [formatCurrency(Number(value)), 'Revenue']}
+                  <YAxis
+                    tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip
+                    formatter={(value) => [
+                      formatCurrency(Number(value)),
+                      "Revenue",
+                    ]}
                     labelFormatter={(label) => `Month: ${label}`}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#3B82F6" 
-                    fill="#3B82F6" 
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#3B82F6"
+                    fill="#3B82F6"
                     fillOpacity={0.2}
                   />
                 </AreaChart>
@@ -118,11 +139,17 @@ export function AnalyticsSection() {
           <Card>
             <CardHeader>
               <CardTitle>Sales by AI Agent</CardTitle>
-              <CardDescription>Revenue breakdown by AI platform this month</CardDescription>
+              <CardDescription>
+                Revenue breakdown by AI platform this month
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-80 w-full flex items-center justify-center">
-                <PieChart width={500} height={300} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <PieChart
+                  width={500}
+                  height={300}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
                   <Pie
                     data={pieChartData}
                     cx="50%"
@@ -133,7 +160,10 @@ export function AnalyticsSection() {
                     dataKey="value"
                     label={(props) => {
                       const { name, value } = props;
-                      const percentage = ((Number(value) / 12450) * 100).toFixed(0);
+                      const percentage = (
+                        (Number(value) / 12450) *
+                        100
+                      ).toFixed(0);
                       return `${name} ${percentage}%`;
                     }}
                     labelLine={false}
@@ -142,13 +172,15 @@ export function AnalyticsSection() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value, name, props) => {
                       const data = props.payload;
-                      const percentage = ((data.value / 12450) * 100).toFixed(1);
+                      const percentage = ((data.value / 12450) * 100).toFixed(
+                        1,
+                      );
                       return [
-                        `${formatCurrency(Number(value))} (${percentage}%)`, 
-                        data.name
+                        `${formatCurrency(Number(value))} (${percentage}%)`,
+                        data.name,
                       ];
                     }}
                     labelFormatter={(label, payload) => {
@@ -156,10 +188,10 @@ export function AnalyticsSection() {
                       return `${data?.orders} orders`;
                     }}
                     contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      backgroundColor: "white",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                     }}
                   />
                 </PieChart>
@@ -171,14 +203,16 @@ export function AnalyticsSection() {
                   const percentage = ((agent.sales / 12450) * 100).toFixed(0);
                   return (
                     <div key={index} className="flex flex-col items-center">
-                      <div 
+                      <div
                         className="w-8 h-8 rounded-full flex items-center justify-center mb-1"
                         style={{ backgroundColor: agent.color }}
                       >
                         <IconComponent className="h-4 w-4 text-white" />
                       </div>
                       <span className="text-xs font-medium">{agent.agent}</span>
-                      <span className="text-xs text-gray-500">{percentage}%</span>
+                      <span className="text-xs text-gray-500">
+                        {percentage}%
+                      </span>
                     </div>
                   );
                 })}

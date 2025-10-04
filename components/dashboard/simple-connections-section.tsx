@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OAuthConnection, OAuthProviderName } from "@/lib/oauth/types";
@@ -13,7 +19,9 @@ interface SimpleConnectionsSectionProps {
   merchantId: string;
 }
 
-export function SimpleConnectionsSection({ merchantId }: SimpleConnectionsSectionProps) {
+export function SimpleConnectionsSection({
+  merchantId,
+}: SimpleConnectionsSectionProps) {
   const [connections, setConnections] = useState<OAuthConnection[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -68,7 +76,9 @@ export function SimpleConnectionsSection({ merchantId }: SimpleConnectionsSectio
     }
   };
 
-  const connectedCount = connections.filter(c => c.status === "connected").length;
+  const connectedCount = connections.filter(
+    (c) => c.status === "connected",
+  ).length;
 
   return (
     <Card>
@@ -98,10 +108,14 @@ export function SimpleConnectionsSection({ merchantId }: SimpleConnectionsSectio
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Plus className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No connections yet</h3>
-            <p className="text-gray-600 mb-4">Connect your first service to get started</p>
-            <Button 
-              onClick={() => handleConnect("square")} 
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No connections yet
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Connect your first service to get started
+            </p>
+            <Button
+              onClick={() => handleConnect("square")}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -111,19 +125,32 @@ export function SimpleConnectionsSection({ merchantId }: SimpleConnectionsSectio
         ) : (
           <div className="space-y-3">
             {connections.slice(0, 3).map((connection) => (
-              <div key={connection.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div
+                key={connection.id}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
                 <div className="flex items-center space-x-3">
                   {getProviderIcon(connection.provider as OAuthProviderName)}
                   <div>
-                    <div className="font-medium capitalize">{connection.provider}</div>
+                    <div className="font-medium capitalize">
+                      {connection.provider}
+                    </div>
                     <div className="text-sm text-gray-600">
-                      {connection.userInfo.name || connection.userInfo.email || "Connected account"}
+                      {connection.userInfo.name ||
+                        connection.userInfo.email ||
+                        "Connected account"}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   {getStatusIcon(connection.status)}
-                  <Badge variant={connection.status === "connected" ? "default" : "secondary"}>
+                  <Badge
+                    variant={
+                      connection.status === "connected"
+                        ? "default"
+                        : "secondary"
+                    }
+                  >
                     {connection.status}
                   </Badge>
                 </div>

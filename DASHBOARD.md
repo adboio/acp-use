@@ -5,12 +5,14 @@ The ACP-Use dashboard provides users with a comprehensive view of their integrat
 ## Features
 
 ### 1. Analytics Overview
+
 - **Total Revenue**: Displays current revenue with month-over-month change
 - **Total Orders**: Shows order count with trend indicators
 - **Active Connections**: Number of connected platforms
 - **Monthly Transactions**: Transaction volume with growth metrics
 
 ### 2. Connected Services Management
+
 - View all connected OAuth providers (Square, Gumroad, Wix)
 - See connection status and health
 - Refresh expired tokens
@@ -18,6 +20,7 @@ The ACP-Use dashboard provides users with a comprehensive view of their integrat
 - Connect new services
 
 ### 3. Stripe Payment Processing
+
 - Onboard with Stripe for payment processing
 - View account status and processing fees
 - Manage payment settings
@@ -25,6 +28,7 @@ The ACP-Use dashboard provides users with a comprehensive view of their integrat
 ## Navigation
 
 The dashboard includes:
+
 - **Header**: User profile, notifications, settings
 - **Sidebar Navigation**: Dashboard, Connections, Demo
 - **Responsive Design**: Works on desktop and mobile

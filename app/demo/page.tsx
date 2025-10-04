@@ -29,24 +29,26 @@ export default function DemoPage() {
 
   // Square image ID to local image mapping
   const squareImageMapping: Record<string, string> = {
-    'square_4ASJKQLTJROKY4BOF6EMSNAE': '/supabase.jpeg',
-    'square_G4C7H6MMPA3ZBGPEYJ726H2G': '/datadog.png',
-    'square_4WCWAQHGXCACN5GJTM63FJIL': '/figma.png',
-    'square_IXJGYW3DEE5I6GIX4KFCJ2HC': '/snap.png',
-    'square_Y3BLHAXMLJDW54UUEZHB76J7': '/yc.png'
+    square_4ASJKQLTJROKY4BOF6EMSNAE: "/supabase.jpeg",
+    square_G4C7H6MMPA3ZBGPEYJ726H2G: "/datadog.png",
+    square_4WCWAQHGXCACN5GJTM63FJIL: "/figma.png",
+    square_IXJGYW3DEE5I6GIX4KFCJ2HC: "/snap.png",
+    square_Y3BLHAXMLJDW54UUEZHB76J7: "/yc.png",
   };
 
   // Function to map product images
   const mapProductImages = (products: any[]) => {
-    return products.map(product => {
+    return products.map((product) => {
       const mappedImage = squareImageMapping[product.id];
       if (mappedImage) {
         return {
           ...product,
-          images: [{
-            url: mappedImage,
-            alt: product.name || "Product image"
-          }]
+          images: [
+            {
+              url: mappedImage,
+              alt: product.name || "Product image",
+            },
+          ],
         };
       }
       return product;
@@ -155,16 +157,17 @@ export default function DemoPage() {
     // Show loading state on the checkout message
     setMessages((prev) =>
       prev.map((msg) =>
-        msg.id === messageId 
+        msg.id === messageId
           ? { ...msg, isCompletingPayment: true, showCheckout: false }
-          : msg
-      )
+          : msg,
+      ),
     );
 
     try {
       // Complete the checkout with the shared payment token
-      const checkoutSessionId = messages.find((m) => m.id === messageId)?.checkoutSession?.id;
-      
+      const checkoutSessionId = messages.find((m) => m.id === messageId)
+        ?.checkoutSession?.id;
+
       const response = await fetch("/api/agent/chat", {
         method: "POST",
         headers: {
@@ -173,9 +176,9 @@ export default function DemoPage() {
         body: JSON.stringify({
           messages: [
             ...messages,
-            { 
-              role: "user", 
-              content: `Complete my payment for checkout session ${checkoutSessionId} with payment token ${sharedPaymentToken}` 
+            {
+              role: "user",
+              content: `Complete my payment for checkout session ${checkoutSessionId} with payment token ${sharedPaymentToken}`,
             },
           ],
         }),
@@ -186,10 +189,8 @@ export default function DemoPage() {
       // Remove loading state
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === messageId 
-            ? { ...msg, isCompletingPayment: false }
-            : msg
-        )
+          msg.id === messageId ? { ...msg, isCompletingPayment: false } : msg,
+        ),
       );
 
       if (data.error) {
@@ -205,14 +206,12 @@ export default function DemoPage() {
       }
     } catch (error) {
       console.error("Payment completion error:", error);
-      
+
       // Remove loading state
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === messageId 
-            ? { ...msg, isCompletingPayment: false }
-            : msg
-        )
+          msg.id === messageId ? { ...msg, isCompletingPayment: false } : msg,
+        ),
       );
 
       addMessage({
@@ -236,7 +235,7 @@ export default function DemoPage() {
 
   const handleBuyNow = async (productId: string, productName: string) => {
     console.log("🛒 [BUY NOW] Buying product:", productId, productName);
-    
+
     // Add user message
     addMessage({
       role: "user",
@@ -288,7 +287,8 @@ export default function DemoPage() {
       console.error("Buy now error:", error);
       addMessage({
         role: "assistant",
-        content: "I'm sorry, I encountered an error processing your purchase. Please try again.",
+        content:
+          "I'm sorry, I encountered an error processing your purchase. Please try again.",
       });
     }
 
@@ -339,7 +339,9 @@ export default function DemoPage() {
                       : "bg-gray-100 text-gray-900"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap">
+                    {message.content}
+                  </p>
 
                   {/* Checkout UI */}
                   {message.showCheckout && message.checkoutSession && (
@@ -375,15 +377,17 @@ export default function DemoPage() {
                 <div className="flex justify-start">
                   <div className="max-w-[80%] w-full">
                     <div className="space-y-2">
-                      {mapProductImages(message.products).map((product, index) => (
-                        <ProductCard
-                          key={product.id || index}
-                          product={product}
-                          onBuyNow={handleBuyNow}
-                          showAddToCart={false}
-                          showBuyNow={true}
-                        />
-                      ))}
+                      {mapProductImages(message.products).map(
+                        (product, index) => (
+                          <ProductCard
+                            key={product.id || index}
+                            product={product}
+                            onBuyNow={handleBuyNow}
+                            showAddToCart={false}
+                            showBuyNow={true}
+                          />
+                        ),
+                      )}
                     </div>
                   </div>
                 </div>

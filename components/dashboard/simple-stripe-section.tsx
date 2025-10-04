@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
@@ -10,12 +16,14 @@ interface SimpleStripeSectionProps {
   merchantId: string;
 }
 
-export function SimpleStripeSection({ }: SimpleStripeSectionProps) {
+export function SimpleStripeSection({}: SimpleStripeSectionProps) {
   const [connected, setConnected] = useState<boolean | null>(null);
   const [onboardingComplete, setOnboardingComplete] = useState<boolean>(false);
   const [missingCount, setMissingCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const [pending, setPending] = useState<"create" | "onboard" | "dashboard" | null>(null);
+  const [pending, setPending] = useState<
+    "create" | "onboard" | "dashboard" | null
+  >(null);
 
   useEffect(() => {
     (async () => {
@@ -118,9 +126,7 @@ export function SimpleStripeSection({ }: SimpleStripeSectionProps) {
               <CreditCard className="h-5 w-5 mr-2" />
               Payment Processing
             </CardTitle>
-            <CardDescription>
-              Accept payments with Stripe
-            </CardDescription>
+            <CardDescription>Accept payments with Stripe</CardDescription>
           </div>
           {getStatusBadge()}
         </div>
@@ -131,10 +137,14 @@ export function SimpleStripeSection({ }: SimpleStripeSectionProps) {
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CreditCard className="h-8 w-8 text-blue-600" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Connect Stripe</h3>
-            <p className="text-gray-600 mb-6">Set up payment processing to accept payments from your customers</p>
-            <Button 
-              onClick={createConnectedAccount} 
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Connect Stripe
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Set up payment processing to accept payments from your customers
+            </p>
+            <Button
+              onClick={createConnectedAccount}
               disabled={pending !== null}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
               size="lg"
@@ -159,14 +169,16 @@ export function SimpleStripeSection({ }: SimpleStripeSectionProps) {
             <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="h-8 w-8 text-yellow-600" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Complete Onboarding</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Complete Onboarding
+            </h3>
             <p className="text-gray-600 mb-4">
               {missingCount > 0
                 ? `You have ${missingCount} required action${missingCount === 1 ? "" : "s"} to complete.`
                 : "Please complete the Stripe onboarding process to enable payments and payouts."}
             </p>
-            <Button 
-              onClick={startOnboarding} 
+            <Button
+              onClick={startOnboarding}
               disabled={pending !== null}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             >
@@ -187,10 +199,14 @@ export function SimpleStripeSection({ }: SimpleStripeSectionProps) {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Stripe Connected!</h3>
-            <p className="text-gray-600 mb-4">Your payment processing is now active.</p>
-            <Button 
-              onClick={openStripeDashboard} 
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Stripe Connected!
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Your payment processing is now active.
+            </p>
+            <Button
+              onClick={openStripeDashboard}
               disabled={pending !== null}
               className="w-full bg-green-600 hover:bg-green-700 text-white"
             >

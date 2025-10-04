@@ -55,8 +55,11 @@ export class SquareOAuthProvider extends BaseOAuthProvider {
     });
 
     const data = await response.json();
-    
-    console.log("🤖 [SQUARE] Token response data:", JSON.stringify(data, null, 2));
+
+    console.log(
+      "🤖 [SQUARE] Token response data:",
+      JSON.stringify(data, null, 2),
+    );
 
     if (data.errors && data.errors.length > 0) {
       throw new Error(`Square OAuth error: ${data.errors[0].detail}`);
@@ -67,15 +70,24 @@ export class SquareOAuthProvider extends BaseOAuthProvider {
     if (data.expires_at) {
       try {
         // Try as Unix timestamp (seconds)
-        if (typeof data.expires_at === 'number') {
+        if (typeof data.expires_at === "number") {
           expiresAt = new Date(data.expires_at * 1000);
-        } else if (typeof data.expires_at === 'string') {
+        } else if (typeof data.expires_at === "string") {
           // Try parsing as ISO string or other formats
           expiresAt = new Date(data.expires_at);
         }
-        console.log("🤖 [SQUARE] Parsed expires_at:", data.expires_at, "->", expiresAt);
+        console.log(
+          "🤖 [SQUARE] Parsed expires_at:",
+          data.expires_at,
+          "->",
+          expiresAt,
+        );
       } catch (error) {
-        console.error("🤖 [SQUARE] Error parsing expires_at:", data.expires_at, error);
+        console.error(
+          "🤖 [SQUARE] Error parsing expires_at:",
+          data.expires_at,
+          error,
+        );
         expiresAt = undefined;
       }
     }
@@ -188,13 +200,14 @@ export class SquareOAuthProvider extends BaseOAuthProvider {
   }
 
   async getProducts(accessToken: string): Promise<any[]> {
-    const baseUrl = this.config.environment === "production" 
-      ? "https://connect.squareup.com" 
-      : "https://connect.squareupsandbox.com";
+    const baseUrl =
+      this.config.environment === "production"
+        ? "https://connect.squareup.com"
+        : "https://connect.squareupsandbox.com";
 
     try {
       console.log("🤖 [SQUARE] Fetching products from Square API...");
-      
+
       const response = await this.makeRequest(
         `${baseUrl}/v2/catalog/list?types=ITEM`,
         {
@@ -219,32 +232,41 @@ export class SquareOAuthProvider extends BaseOAuthProvider {
       return items.map((item: any) => this.transformSquareItemToProduct(item));
     } catch (error) {
       console.error("🤖 [SQUARE] Error fetching products:", error);
-      throw new Error(`Failed to fetch products: ${error instanceof Error ? error.message : "Unknown error"}`);
+      throw new Error(
+        `Failed to fetch products: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
-  async createOrder(accessToken: string, orderData: {
-    idempotencyKey: string;
-    lineItems: Array<{
-      id: string;
-      name: string;
-      quantity: number;
-      baseAmount: number;
-      currency: string;
-    }>;
-    locationId?: string;
-    referenceId?: string;
-    paymentIntentId?: string;
-    totalAmount?: number;
-    taxAmount?: number;
-  }): Promise<any> {
-    const baseUrl = this.config.environment === "production" 
-      ? "https://connect.squareup.com" 
-      : "https://connect.squareupsandbox.com";
+  async createOrder(
+    accessToken: string,
+    orderData: {
+      idempotencyKey: string;
+      lineItems: Array<{
+        id: string;
+        name: string;
+        quantity: number;
+        baseAmount: number;
+        currency: string;
+      }>;
+      locationId?: string;
+      referenceId?: string;
+      paymentIntentId?: string;
+      totalAmount?: number;
+      taxAmount?: number;
+    },
+  ): Promise<any> {
+    const baseUrl =
+      this.config.environment === "production"
+        ? "https://connect.squareup.com"
+        : "https://connect.squareupsandbox.com";
 
     try {
-      console.log("🤖 [SQUARE] Creating order in Square...", JSON.stringify(orderData, null, 2));
-      
+      console.log(
+        "🤖 [SQUARE] Creating order in Square...",
+        JSON.stringify(orderData, null, 2),
+      );
+
       // First, get the merchant's locations to find a valid location_id
       let locationId = orderData.locationId;
       if (!locationId) {
@@ -257,23 +279,25 @@ export class SquareOAuthProvider extends BaseOAuthProvider {
             },
           },
         );
-        
+
         const locationsData = await locationsResponse.json();
         if (locationsData.errors && locationsData.errors.length > 0) {
-          throw new Error(`Square locations error: ${locationsData.errors[0].detail}`);
+          throw new Error(
+            `Square locations error: ${locationsData.errors[0].detail}`,
+          );
         }
-        
+
         const locations = locationsData.locations || [];
         if (locations.length === 0) {
           throw new Error("No Square locations found for this merchant");
         }
-        
+
         locationId = locations[0].id;
         console.log("🤖 [SQUARE] Using location ID:", locationId);
       }
 
       // Transform line items to Square format
-      const squareLineItems = orderData.lineItems.map(item => ({
+      const squareLineItems = orderData.lineItems.map((item) => ({
         name: item.name,
         quantity: item.quantity.toString(),
         base_price_money: {
@@ -285,7 +309,13 @@ export class SquareOAuthProvider extends BaseOAuthProvider {
       }));
 
       // Use the passed total amount or calculate from line items as fallback
-      const totalAmount = orderData.totalAmount || squareLineItems.reduce((sum, item) => sum + (item.base_price_money.amount * parseInt(item.quantity)), 0);
+      const totalAmount =
+        orderData.totalAmount ||
+        squareLineItems.reduce(
+          (sum, item) =>
+            sum + item.base_price_money.amount * parseInt(item.quantity),
+          0,
+        );
       console.log("🤖 [SQUARE] Using total amount for tender:", totalAmount);
 
       // Build the order payload
@@ -303,13 +333,17 @@ export class SquareOAuthProvider extends BaseOAuthProvider {
 
       // Add service charge for tax if provided
       if (orderData.taxAmount && orderData.taxAmount > 0) {
-        console.log("🤖 [SQUARE] Adding tax as service charge:", orderData.taxAmount);
+        console.log(
+          "🤖 [SQUARE] Adding tax as service charge:",
+          orderData.taxAmount,
+        );
         orderPayload.order.service_charges = [
           {
             name: "Tax",
             amount_money: {
               amount: orderData.taxAmount,
-              currency: orderData.lineItems[0]?.currency?.toUpperCase() || "USD",
+              currency:
+                orderData.lineItems[0]?.currency?.toUpperCase() || "USD",
             },
             calculation_phase: "TOTAL_PHASE",
           },
@@ -318,7 +352,9 @@ export class SquareOAuthProvider extends BaseOAuthProvider {
 
       // Don't add tenders for external payments
       // Payment was already processed by Stripe - just track it in metadata
-      console.log("🤖 [SQUARE] Not adding tenders - payment processed externally via Stripe");
+      console.log(
+        "🤖 [SQUARE] Not adding tenders - payment processed externally via Stripe",
+      );
 
       // Add fulfillment and metadata
       orderPayload.order.fulfillments = [
@@ -330,7 +366,9 @@ export class SquareOAuthProvider extends BaseOAuthProvider {
               display_name: "Customer",
             },
             pickup_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
-            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+            expires_at: new Date(
+              Date.now() + 7 * 24 * 60 * 60 * 1000,
+            ).toISOString(), // 7 days from now
           },
           metadata: {
             source: "acp_checkout",
@@ -351,57 +389,80 @@ export class SquareOAuthProvider extends BaseOAuthProvider {
         stripe_amount: totalAmount.toString(),
       };
 
-      console.log("🤖 [SQUARE] Order payload:", JSON.stringify(orderPayload, null, 2));
-
-      const response = await this.makeRequest(
-        `${baseUrl}/v2/orders`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Square-Version": "2025-01-23",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(orderPayload),
-        },
+      console.log(
+        "🤖 [SQUARE] Order payload:",
+        JSON.stringify(orderPayload, null, 2),
       );
 
+      const response = await this.makeRequest(`${baseUrl}/v2/orders`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Square-Version": "2025-01-23",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderPayload),
+      });
+
       const data = await response.json();
-      console.log("🤖 [SQUARE] Order creation response:", JSON.stringify(data, null, 2));
+      console.log(
+        "🤖 [SQUARE] Order creation response:",
+        JSON.stringify(data, null, 2),
+      );
 
       if (data.errors && data.errors.length > 0) {
-        throw new Error(`Square order creation error: ${data.errors[0].detail}`);
+        throw new Error(
+          `Square order creation error: ${data.errors[0].detail}`,
+        );
       }
 
       const createdOrder = data.order;
-      console.log("🤖 [SQUARE] Order created successfully:", createdOrder.id, "version:", createdOrder.version);
-      
-      // Note: We leave the order as OPEN because Square requires payment to be processed 
+      console.log(
+        "🤖 [SQUARE] Order created successfully:",
+        createdOrder.id,
+        "version:",
+        createdOrder.version,
+      );
+
+      // Note: We leave the order as OPEN because Square requires payment to be processed
       // through Square to mark as COMPLETED. Since payment was processed via Stripe,
       // the order will show as OPEN in Square dashboard with metadata indicating
       // the external payment details. Merchants can manually complete if needed.
-      console.log("🤖 [SQUARE] Order created as OPEN (payment processed externally via Stripe)");
-      console.log("🤖 [SQUARE] Order metadata contains Stripe payment details:", {
-        payment_intent_id: orderData.paymentIntentId,
-        stripe_amount: totalAmount,
-        payment_status: "succeeded"
-      });
-      
+      console.log(
+        "🤖 [SQUARE] Order created as OPEN (payment processed externally via Stripe)",
+      );
+      console.log(
+        "🤖 [SQUARE] Order metadata contains Stripe payment details:",
+        {
+          payment_intent_id: orderData.paymentIntentId,
+          stripe_amount: totalAmount,
+          payment_status: "succeeded",
+        },
+      );
+
       return createdOrder;
     } catch (error) {
       console.error("🤖 [SQUARE] Error creating order:", error);
-      throw new Error(`Failed to create Square order: ${error instanceof Error ? error.message : "Unknown error"}`);
+      throw new Error(
+        `Failed to create Square order: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
-  async updateOrderStatus(accessToken: string, orderId: string, version: number, status: "OPEN" | "COMPLETED" | "CANCELED"): Promise<any> {
-    const baseUrl = this.config.environment === "production" 
-      ? "https://connect.squareup.com" 
-      : "https://connect.squareupsandbox.com";
+  async updateOrderStatus(
+    accessToken: string,
+    orderId: string,
+    version: number,
+    status: "OPEN" | "COMPLETED" | "CANCELED",
+  ): Promise<any> {
+    const baseUrl =
+      this.config.environment === "production"
+        ? "https://connect.squareup.com"
+        : "https://connect.squareupsandbox.com";
 
     try {
       console.log(`🤖 [SQUARE] Updating order ${orderId} to status: ${status}`);
-      
+
       const updatePayload = {
         order: {
           version: version,
@@ -423,7 +484,10 @@ export class SquareOAuthProvider extends BaseOAuthProvider {
       );
 
       const data = await response.json();
-      console.log("🤖 [SQUARE] Order update response:", JSON.stringify(data, null, 2));
+      console.log(
+        "🤖 [SQUARE] Order update response:",
+        JSON.stringify(data, null, 2),
+      );
 
       if (data.errors && data.errors.length > 0) {
         throw new Error(`Square order update error: ${data.errors[0].detail}`);
@@ -432,53 +496,74 @@ export class SquareOAuthProvider extends BaseOAuthProvider {
       return data.order;
     } catch (error) {
       console.error("🤖 [SQUARE] Error updating order:", error);
-      throw new Error(`Failed to update Square order: ${error instanceof Error ? error.message : "Unknown error"}`);
+      throw new Error(
+        `Failed to update Square order: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
   private transformSquareItemToProduct(item: any): any {
     const itemData = item.item_data;
     const variations = itemData?.variations || [];
-    
-    console.log(`🔍 [SQUARE] Raw Square item data for ${item.id}:`, JSON.stringify(item, null, 2));
+
+    console.log(
+      `🔍 [SQUARE] Raw Square item data for ${item.id}:`,
+      JSON.stringify(item, null, 2),
+    );
     console.log(`🔍 [SQUARE] Item data:`, JSON.stringify(itemData, null, 2));
     console.log(`🔍 [SQUARE] Variations:`, JSON.stringify(variations, null, 2));
-    
+
     // Get the first variation for basic pricing info
     const firstVariation = variations[0];
     const priceMoney = firstVariation?.item_variation_data?.price_money;
-    
-    console.log(`🔍 [SQUARE] First variation:`, JSON.stringify(firstVariation, null, 2));
-    console.log(`🔍 [SQUARE] Price money:`, JSON.stringify(priceMoney, null, 2));
-    
+
+    console.log(
+      `🔍 [SQUARE] First variation:`,
+      JSON.stringify(firstVariation, null, 2),
+    );
+    console.log(
+      `🔍 [SQUARE] Price money:`,
+      JSON.stringify(priceMoney, null, 2),
+    );
+
     // Square image ID to local image mapping
     const squareImageMapping: Record<string, string> = {
-      'square_4ASJKQLTJROKY4BOF6EMSNAE': '/supabase.jpeg',
-      'square_G4C7H6MMPA3ZBGPEYJ726H2G': '/datadog.png',
-      'square_4WCWAQHGXCACN5GJTM63FJIL': '/figma.png',
-      'square_IXJGYW3DEE5I6GIX4KFCJ2HC': '/snap.png',
-      'square_Y3BLHAXMLJDW54UUEZHB76J7': '/yc.png'
+      square_4ASJKQLTJROKY4BOF6EMSNAE: "/supabase.jpeg",
+      square_G4C7H6MMPA3ZBGPEYJ726H2G: "/datadog.png",
+      square_4WCWAQHGXCACN5GJTM63FJIL: "/figma.png",
+      square_IXJGYW3DEE5I6GIX4KFCJ2HC: "/snap.png",
+      square_Y3BLHAXMLJDW54UUEZHB76J7: "/yc.png",
     };
-    
+
     const productId = `square_${item.id}`;
     const mappedImage = squareImageMapping[productId];
-    
-    console.log(`🖼️ [SQUARE] Product ID: ${productId}, Mapped image: ${mappedImage}`);
-    
+
+    console.log(
+      `🖼️ [SQUARE] Product ID: ${productId}, Mapped image: ${mappedImage}`,
+    );
+
     // Use mapped image if available, otherwise fallback to placeholder
-    const images = mappedImage ? [{
-      url: mappedImage,
-      alt: itemData?.name || "Product image"
-    }] : [{
-      url: "https://via.placeholder.com/300x300?text=Square+Product",
-      alt: itemData?.name || "Product image"
-    }];
-    
+    const images = mappedImage
+      ? [
+          {
+            url: mappedImage,
+            alt: itemData?.name || "Product image",
+          },
+        ]
+      : [
+          {
+            url: "https://via.placeholder.com/300x300?text=Square+Product",
+            alt: itemData?.name || "Product image",
+          },
+        ];
+
     console.log(`🖼️ [SQUARE] Final images for ${productId}:`, images);
 
     const productPrice = priceMoney?.amount || 0;
-    console.log(`💰 [SQUARE] Product ${productId}: Square price = ${productPrice} cents ($${(productPrice/100).toFixed(2)})`);
-    
+    console.log(
+      `💰 [SQUARE] Product ${productId}: Square price = ${productPrice} cents ($${(productPrice / 100).toFixed(2)})`,
+    );
+
     return {
       id: productId,
       name: itemData?.name || "Unnamed Product",

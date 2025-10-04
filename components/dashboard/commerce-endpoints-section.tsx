@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Copy, Globe, ShoppingCart } from "lucide-react";
 
@@ -10,7 +16,10 @@ interface CommerceEndpointsSectionProps {
   baseUrl: string;
 }
 
-export function CommerceEndpointsSection({ merchantId, baseUrl }: CommerceEndpointsSectionProps) {
+export function CommerceEndpointsSection({
+  merchantId,
+  baseUrl,
+}: CommerceEndpointsSectionProps) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const productFeedUrl = `${baseUrl}/api/feed/${merchantId}`;
@@ -26,12 +35,12 @@ export function CommerceEndpointsSection({ merchantId, baseUrl }: CommerceEndpoi
     }
   };
 
-  const EndpointCard = ({ 
-    title, 
-    description, 
-    url, 
-    field, 
-    icon: Icon 
+  const EndpointCard = ({
+    title,
+    description,
+    url,
+    field,
+    icon: Icon,
   }: {
     title: string;
     description: string;
@@ -74,9 +83,12 @@ export function CommerceEndpointsSection({ merchantId, baseUrl }: CommerceEndpoi
           <div className="flex items-center">
             <CheckCircle className="h-6 w-6 text-green-600 mr-3" />
             <div>
-              <CardTitle className="text-lg text-green-800">Setup Complete</CardTitle>
+              <CardTitle className="text-lg text-green-800">
+                Setup Complete
+              </CardTitle>
               <CardDescription className="text-green-700">
-                Give these URLs to your AI agent (like ChatGPT) and customers will instantly be able to discover and purchase your products.
+                Give these URLs to your AI agent (like ChatGPT) and customers
+                will instantly be able to discover and purchase your products.
               </CardDescription>
             </div>
           </div>

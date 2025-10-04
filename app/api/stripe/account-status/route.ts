@@ -31,9 +31,7 @@ export async function GET() {
       return NextResponse.json({ connected: false });
     }
 
-    const status = await getConnectedAccountStatus(
-      merchant.stripe_account_id,
-    );
+    const status = await getConnectedAccountStatus(merchant.stripe_account_id);
     return NextResponse.json(status);
   } catch (error) {
     console.error("Error retrieving connected account status:", error);

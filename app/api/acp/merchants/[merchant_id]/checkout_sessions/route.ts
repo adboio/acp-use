@@ -1,22 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { checkoutSessions } from "@/lib/checkout-sessions";
 
 type ItemInput = {
   id: string;
   quantity: number;
 };
-
-// In-memory storage for checkout sessions (replace with DB in production)
-// Use globalThis to persist across Next.js hot reloads in development
-const globalForCheckout = globalThis as unknown as {
-  checkoutSessions: Map<string, any> | undefined;
-};
-
-export const checkoutSessions = 
-  globalForCheckout.checkoutSessions ?? new Map<string, any>();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForCheckout.checkoutSessions = checkoutSessions;
-}
 
 export async function POST(
   request: NextRequest,
@@ -70,7 +58,9 @@ export async function POST(
     );
     const feedData = await feedResponse.json();
     productData = feedData.products || [];
-    console.log(`🛒 [ACP-CREATE] Fetched ${productData.length} products for pricing`);
+    console.log(
+      `🛒 [ACP-CREATE] Fetched ${productData.length} products for pricing`,
+    );
   } catch (error) {
     console.error("❌ [ACP-CREATE] Error fetching product data:", error);
     // Fall back to mock pricing if product fetch fails
@@ -82,11 +72,13 @@ export async function POST(
 
   const line_items = items.map((item, index) => {
     // Find the product data for this item
-    const product = productData.find(p => p.id === item.id);
+    const product = productData.find((p) => p.id === item.id);
     const unitBaseAmount = product?.price || 1500; // Use real price or fallback to $15.00
-    
-    console.log(`🛒 [ACP-CREATE] Item ${item.id}: product price = ${product?.price || 'not found'}, using ${unitBaseAmount}`);
-    
+
+    console.log(
+      `🛒 [ACP-CREATE] Item ${item.id}: product price = ${product?.price || "not found"}, using ${unitBaseAmount}`,
+    );
+
     const base_amount = unitBaseAmount * Math.max(1, item.quantity);
     const discount = 0;
     const subtotal = base_amount - discount;
@@ -200,8 +192,12 @@ export async function POST(
 
   // Store the checkout session
   checkoutSessions.set(checkout_session.id, checkout_session);
-  console.log(`🛒 [ACP-CREATE] Stored checkout session ${checkout_session.id} in memory`);
-  console.log(`🛒 [ACP-CREATE] Total sessions in memory: ${checkoutSessions.size}`);
+  console.log(
+    `🛒 [ACP-CREATE] Stored checkout session ${checkout_session.id} in memory`,
+  );
+  console.log(
+    `🛒 [ACP-CREATE] Total sessions in memory: ${checkoutSessions.size}`,
+  );
 
   console.log(
     "🛒 [ACP-CREATE] Returning checkout session:",

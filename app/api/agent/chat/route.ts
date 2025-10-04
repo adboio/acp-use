@@ -26,9 +26,12 @@ async function get_feed(merchantId: string) {
   }
 }
 
-async function create_checkout(args: {
-  line_items: { id: string; quantity: number }[];
-}, merchantId: string) {
+async function create_checkout(
+  args: {
+    line_items: { id: string; quantity: number }[];
+  },
+  merchantId: string,
+) {
   console.log("🛒 [create_checkout] Starting checkout creation...");
   console.log("🛒 [create_checkout] Args:", JSON.stringify(args, null, 2));
 
@@ -67,12 +70,15 @@ async function create_checkout(args: {
   }
 }
 
-async function update_checkout(args: {
-  session_id: string;
-  fulfillment_option_id?: string;
-  contact?: { name?: string; phone?: string; email?: string };
-  notes?: string;
-}, merchantId: string) {
+async function update_checkout(
+  args: {
+    session_id: string;
+    fulfillment_option_id?: string;
+    contact?: { name?: string; phone?: string; email?: string };
+    notes?: string;
+  },
+  merchantId: string,
+) {
   console.log("📝 [update_checkout] Starting checkout update...");
   console.log("📝 [update_checkout] Args:", JSON.stringify(args, null, 2));
 
@@ -110,10 +116,13 @@ async function update_checkout(args: {
   }
 }
 
-async function complete_checkout(args: {
-  session_id: string;
-  shared_payment_token?: string;
-}, merchantId: string) {
+async function complete_checkout(
+  args: {
+    session_id: string;
+    shared_payment_token?: string;
+  },
+  merchantId: string,
+) {
   console.log("✅ [complete_checkout] Starting checkout completion...");
   console.log("✅ [complete_checkout] Args:", JSON.stringify(args, null, 2));
 
@@ -121,18 +130,23 @@ async function complete_checkout(args: {
     // First, get the checkout session to retrieve line_items
     const getUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/acp/merchants/${merchantId}/checkout_sessions/${args.session_id}`;
     console.log("✅ [complete_checkout] GET URL:", getUrl);
-    
+
     const getResponse = await fetch(getUrl, {
       method: "GET",
       headers: { "content-type": "application/json" },
     });
-    
+
     if (!getResponse.ok) {
-      throw new Error(`Failed to fetch checkout session: ${getResponse.status}`);
+      throw new Error(
+        `Failed to fetch checkout session: ${getResponse.status}`,
+      );
     }
-    
+
     const checkoutSession = await getResponse.json();
-    console.log("✅ [complete_checkout] Retrieved checkout session:", JSON.stringify(checkoutSession, null, 2));
+    console.log(
+      "✅ [complete_checkout] Retrieved checkout session:",
+      JSON.stringify(checkoutSession, null, 2),
+    );
 
     const url = `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/acp/merchants/${merchantId}/checkout_sessions/${args.session_id}/complete`;
     console.log("✅ [complete_checkout] POST URL:", url);
@@ -237,7 +251,7 @@ const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
       },
     },
   },
-    {
+  {
     type: "function",
     function: {
       name: "complete_checkout",
@@ -311,7 +325,11 @@ export async function POST(request: NextRequest) {
     try {
       console.log("🤖 [CHAT] Fetching product feed for context...");
       productFeed = await get_feed(merchantId);
-      console.log("🤖 [CHAT] Product feed fetched:", productFeed?.products?.length || 0, "products");
+      console.log(
+        "🤖 [CHAT] Product feed fetched:",
+        productFeed?.products?.length || 0,
+        "products",
+      );
     } catch (error) {
       console.error("❌ [CHAT] Error fetching product feed:", error);
     }
@@ -374,7 +392,11 @@ IMPORTANT:
 Remember: You're representing an e-commerce store and should maintain a professional, helpful tone while making the shopping experience smooth and efficient. Focus on helping customers find the right products. When they're ready to buy, create the checkout session right away. The payment form will appear directly in this chat conversation. Only confirm the purchase is complete after payment is processed.`;
 
     // Add product context if available
-    if (productFeed && productFeed.products && productFeed.products.length > 0) {
+    if (
+      productFeed &&
+      productFeed.products &&
+      productFeed.products.length > 0
+    ) {
       systemContent += `\n\nCURRENT PRODUCT CATALOG:\nYou have access to the following products. Only recommend products from this list:\n\n`;
       productFeed.products.forEach((product: any, index: number) => {
         systemContent += `${index + 1}. ${product.name} (ID: ${product.id}) - $${(product.price / 100).toFixed(2)} - ${product.description}\n`;
@@ -495,31 +517,31 @@ Remember: You're representing an e-commerce store and should maintain a professi
       // No tool calls: the model produced final text
       // console.log("🤖 [CHAT] Model produced final response:", message.content);
       // console.log("🤖 [CHAT] Final state:", JSON.stringify(state, null, 2));
-      
+
       // Parse structured product data from the response
       let products = [];
-      let content = message.content || '';
-      
+      let content = message.content || "";
+
       // Helper function to clean up content formatting
       const cleanContent = (text: string) => {
         return text
-          .replace(/\n\s*\n\s*\n/g, '\n\n') // Replace 3+ newlines with 2
-          .replace(/^\s+|\s+$/g, '') // Remove leading/trailing whitespace
-          .replace(/\n\s*\n$/, '') // Remove trailing newlines
+          .replace(/\n\s*\n\s*\n/g, "\n\n") // Replace 3+ newlines with 2
+          .replace(/^\s+|\s+$/g, "") // Remove leading/trailing whitespace
+          .replace(/\n\s*\n$/, "") // Remove trailing newlines
           .trim();
       };
-      
+
       console.log("🔍 [CHAT] Parsing content for products:", content);
-      
+
       // Try multiple patterns to match the products
       const patterns = [
         /PRODUCTS_START\s*(\[[\s\S]*?\])\s*PRODUCTS_END/,
         /```json\s*(\[[\s\S]*?\])\s*```/,
         /```\s*(\[[\s\S]*?\])\s*```/,
         // Fallback: look for any JSON array that looks like products
-        /\[\s*\{[\s\S]*?"id"[\s\S]*?"name"[\s\S]*?"price"[\s\S]*?\}[\s\S]*?\]/
+        /\[\s*\{[\s\S]*?"id"[\s\S]*?"name"[\s\S]*?"price"[\s\S]*?\}[\s\S]*?\]/,
       ];
-      
+
       let productsMatch = null;
       for (const pattern of patterns) {
         productsMatch = content.match(pattern);
@@ -528,14 +550,14 @@ Remember: You're representing an e-commerce store and should maintain a professi
           break;
         }
       }
-      
+
       if (productsMatch) {
         try {
           console.log("🔍 [CHAT] Raw products JSON:", productsMatch[1]);
           products = JSON.parse(productsMatch[1]);
           console.log("🔍 [CHAT] Parsed products:", products);
           // Remove the products section from the content and clean up whitespace
-          content = cleanContent(content.replace(productsMatch[0], ''));
+          content = cleanContent(content.replace(productsMatch[0], ""));
         } catch (error) {
           console.error("❌ [CHAT] Error parsing products:", error);
           console.error("❌ [CHAT] Raw JSON that failed:", productsMatch[1]);
@@ -545,7 +567,7 @@ Remember: You're representing an e-commerce store and should maintain a professi
         // Clean up content even when no products are found
         content = cleanContent(content);
       }
-      
+
       return NextResponse.json({
         content,
         products,
