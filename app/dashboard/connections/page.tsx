@@ -23,7 +23,7 @@ export default async function ConnectionsPage() {
   if (merchantError || !merchant) {
     // Handle case where user doesn't have a merchant account
     return (
-      <div className="container mx-auto py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold">Account Connections</h1>
@@ -33,14 +33,14 @@ export default async function ConnectionsPage() {
             </p>
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
   const merchantId = merchant.id;
 
   return (
-    <div className="container mx-auto py-8">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Account Connections</h1>
@@ -52,6 +52,6 @@ export default async function ConnectionsPage() {
 
         <ConnectionManager merchantId={merchantId} />
       </div>
-    </div>
+    </main>
   );
 }

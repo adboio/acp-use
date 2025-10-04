@@ -52,7 +52,7 @@ export async function GET(
 
     // Redirect to success page or return URL
     const successUrl = new URL(
-      "/protected/connections?success=true",
+      "/dashboard/connections?success=true",
       request.url,
     );
     successUrl.searchParams.set("provider", provider);

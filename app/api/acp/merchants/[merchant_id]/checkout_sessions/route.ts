@@ -5,6 +5,19 @@ type ItemInput = {
   quantity: number;
 };
 
+// In-memory storage for checkout sessions (replace with DB in production)
+// Use globalThis to persist across Next.js hot reloads in development
+const globalForCheckout = globalThis as unknown as {
+  checkoutSessions: Map<string, any> | undefined;
+};
+
+export const checkoutSessions = 
+  globalForCheckout.checkoutSessions ?? new Map<string, any>();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForCheckout.checkoutSessions = checkoutSessions;
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ merchant_id: string }> },
@@ -48,12 +61,32 @@ export async function POST(
     items = [{ id: "item_mock_001", quantity: 1 }];
   }
 
-  // Build mock line items. Use a flat base amount per unit for demonstration.
+  // Fetch product data to get real prices
+  let productData: any[] = [];
+  try {
+    console.log("🛒 [ACP-CREATE] Fetching product data for pricing...");
+    const feedResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/feed/${merchant_id}`,
+    );
+    const feedData = await feedResponse.json();
+    productData = feedData.products || [];
+    console.log(`🛒 [ACP-CREATE] Fetched ${productData.length} products for pricing`);
+  } catch (error) {
+    console.error("❌ [ACP-CREATE] Error fetching product data:", error);
+    // Fall back to mock pricing if product fetch fails
+  }
+
+  // Build line items with real product prices
   const currency = "usd";
-  const unitBaseAmount = 1500; // $15.00 in minor units
   const taxRate = 0.08; // 8% mock tax
 
   const line_items = items.map((item, index) => {
+    // Find the product data for this item
+    const product = productData.find(p => p.id === item.id);
+    const unitBaseAmount = product?.price || 1500; // Use real price or fallback to $15.00
+    
+    console.log(`🛒 [ACP-CREATE] Item ${item.id}: product price = ${product?.price || 'not found'}, using ${unitBaseAmount}`);
+    
     const base_amount = unitBaseAmount * Math.max(1, item.quantity);
     const discount = 0;
     const subtotal = base_amount - discount;
@@ -61,7 +94,11 @@ export async function POST(
     const total = subtotal + tax;
     return {
       id: `li_${index + 1}`,
-      item,
+      item: {
+        ...item,
+        name: product?.name || `Item ${item.id}`,
+        description: product?.description || "",
+      },
       base_amount,
       discount,
       subtotal,
@@ -83,6 +120,7 @@ export async function POST(
 
   const checkout_session = {
     id: `checkout_session_${Date.now()}`,
+    merchant_id, // Include merchant_id for payment processing
     buyer: undefined,
     payment_provider: {
       provider: "stripe",
@@ -159,6 +197,11 @@ export async function POST(
   const headers = new Headers();
   if (idempotencyKey) headers.set("Idempotency-Key", idempotencyKey);
   if (requestId) headers.set("Request-Id", requestId);
+
+  // Store the checkout session
+  checkoutSessions.set(checkout_session.id, checkout_session);
+  console.log(`🛒 [ACP-CREATE] Stored checkout session ${checkout_session.id} in memory`);
+  console.log(`🛒 [ACP-CREATE] Total sessions in memory: ${checkoutSessions.size}`);
 
   console.log(
     "🛒 [ACP-CREATE] Returning checkout session:",

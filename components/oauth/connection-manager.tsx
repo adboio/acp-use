@@ -18,7 +18,7 @@ import {
   ExternalLink,
   Trash2,
 } from "lucide-react";
-import { SiSquare, SiGumroad } from "@icons-pack/react-simple-icons";
+import { SiSquare, SiGumroad, SiWix } from "@icons-pack/react-simple-icons";
 
 interface ConnectionManagerProps {
   merchantId: string;
@@ -141,6 +141,8 @@ export function ConnectionManager({ merchantId }: ConnectionManagerProps) {
         return <SiSquare className="h-5 w-5" color="#00C851" />;
       case "gumroad":
         return <SiGumroad className="h-5 w-5" color="#36A9AE" />;
+      case "wix":
+        return <SiWix className="h-5 w-5" color="#0C6CF2" />;
       default:
         return <ExternalLink className="h-5 w-5 text-gray-600" />;
     }
@@ -160,6 +162,11 @@ export function ConnectionManager({ merchantId }: ConnectionManagerProps) {
       name: "gumroad",
       displayName: "Gumroad",
       description: "Digital product sales and subscriptions",
+    },
+    {
+      name: "wix",
+      displayName: "Wix",
+      description: "Website builder and e-commerce platform",
     },
   ];
 

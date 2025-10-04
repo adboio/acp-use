@@ -8,6 +8,7 @@ import {
 } from "./types";
 import { SquareOAuthProvider } from "./providers/square";
 import { GumroadOAuthProvider } from "./providers/gumroad";
+import { WixOAuthProvider } from "./providers/wix";
 
 export class OAuthManager {
   private providers: Map<OAuthProviderName, OAuthProvider> = new Map();
@@ -28,6 +29,7 @@ export class OAuthManager {
         redirectUri: `${process.env.NEXT_PUBLIC_BASE_URL}/api/oauth/callback/square`,
         scopes: [
           "MERCHANT_PROFILE_READ",
+          "ITEMS_READ",
           "ORDERS_READ",
           "ORDERS_WRITE",
           "PAYMENTS_READ",
@@ -65,6 +67,30 @@ export class OAuthManager {
         environment: "production" as const,
       };
       this.providers.set("gumroad", new GumroadOAuthProvider(gumroadConfig));
+    }
+
+    // Wix Provider
+    if (
+      process.env.NEXT_PUBLIC_WIX_APP_ID &&
+      process.env.WIX_APP_SECRET
+    ) {
+      const wixConfig = {
+        clientId: process.env.NEXT_PUBLIC_WIX_APP_ID,
+        clientSecret: process.env.WIX_APP_SECRET,
+        redirectUri: `${process.env.NEXT_PUBLIC_BASE_URL}/api/oauth/callback/wix`,
+        scopes: [
+          "SITE_READ",
+          "SITE_WRITE",
+          "STORES_READ",
+          "STORES_WRITE",
+          "ORDERS_READ",
+          "ORDERS_WRITE",
+        ],
+        authorizationUrl: "https://www.wix.com/oauth/authorize",
+        tokenUrl: "https://www.wixapis.com/oauth/access",
+        environment: "production" as const,
+      };
+      this.providers.set("wix", new WixOAuthProvider(wixConfig));
     }
   }
 
@@ -111,13 +137,20 @@ export class OAuthManager {
     }
 
     try {
+      console.log("🤖 [OAUTH MANAGER] Starting OAuth flow for provider:", providerName);
+      
       // Exchange code for tokens
+      console.log("🤖 [OAUTH MANAGER] Exchanging code for tokens...");
       const tokens = await provider.exchangeCodeForTokens(code, state);
+      console.log("🤖 [OAUTH MANAGER] Successfully exchanged code for tokens");
 
       // Get user info
+      console.log("🤖 [OAUTH MANAGER] Getting user info...");
       const userInfo = await provider.getUserInfo(tokens.accessToken);
+      console.log("🤖 [OAUTH MANAGER] Successfully got user info");
 
       // Store connection in database
+      console.log("🤖 [OAUTH MANAGER] Storing connection in database...");
       const connection = await this.storeConnection({
         merchantId: stateData.merchantId,
         provider: providerName,
@@ -125,6 +158,7 @@ export class OAuthManager {
         userInfo,
         capabilities: provider.capabilities,
       });
+      console.log("🤖 [OAUTH MANAGER] Successfully stored connection");
 
       return connection;
     } catch (error) {
@@ -248,6 +282,20 @@ export class OAuthManager {
   }): Promise<OAuthConnection> {
     const supabase = await createClient();
 
+    console.log("🤖 [OAUTH MANAGER] Storing connection with tokens:", JSON.stringify(data.tokens, null, 2));
+    
+    // Safely handle expiresAt
+    let expiresAtString: string | undefined;
+    if (data.tokens.expiresAt) {
+      try {
+        expiresAtString = data.tokens.expiresAt.toISOString();
+        console.log("🤖 [OAUTH MANAGER] Converted expiresAt to ISO string:", expiresAtString);
+      } catch (error) {
+        console.error("🤖 [OAUTH MANAGER] Error converting expiresAt to ISO string:", data.tokens.expiresAt, error);
+        expiresAtString = undefined;
+      }
+    }
+
     const { data: connection, error } = await supabase
       .from("merchant_connectors")
       .insert({
@@ -257,7 +305,7 @@ export class OAuthManager {
         credentials: {
           accessToken: data.tokens.accessToken,
           refreshToken: data.tokens.refreshToken,
-          expiresAt: data.tokens.expiresAt?.toISOString(),
+          expiresAt: expiresAtString,
           scope: data.tokens.scope,
           tokenType: data.tokens.tokenType,
         },

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
-  PaymentElement,
+  CardElement,
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
@@ -53,47 +53,24 @@ function CheckoutForm({
     setStatus("processing");
 
     try {
-      // Create SetupIntent to collect payment method
-      const response = await fetch("/api/stripe/create-setup-intent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          customer_email: checkoutSession.contact?.email,
-          amount:
-            checkoutSession.totals?.find((t: any) => t.type === "total")
-              ?.amount || 0,
-          currency: checkoutSession.currency || "usd",
-        }),
-      });
-
-      const { client_secret } = await response.json();
-
-      if (!client_secret) {
-        throw new Error("Failed to create setup intent");
-      }
-
-      // Confirm the setup
-      const result = await stripe.confirmSetup({
-        elements,
-        clientSecret: client_secret,
-        confirmParams: {
-          return_url: `${window.location.origin}/demo`,
+      // Create payment method directly from card element
+      const { error, paymentMethod } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: elements.getElement(CardElement)!,
+        billing_details: {
+          email: checkoutSession.contact?.email,
         },
       });
 
-      if (result.error) {
-        throw result.error;
+      if (error) {
+        throw error;
       }
 
-      // Type assertion since we know setupIntent exists when no error
-      const setupIntent = (result as any).setupIntent;
-      if (!setupIntent || !setupIntent.payment_method) {
-        throw new Error("SetupIntent confirmation failed");
+      if (!paymentMethod) {
+        throw new Error("Failed to create payment method");
       }
 
-      // Create Shared Payment Token
+      // Create PaymentIntent directly with payment method
       const tokenResponse = await fetch(
         "/api/stripe/create-shared-payment-token",
         {
@@ -102,23 +79,32 @@ function CheckoutForm({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            setup_intent_id: setupIntent.id,
+            payment_method_id: paymentMethod.id,
             amount:
               checkoutSession.totals?.find((t: any) => t.type === "total")
                 ?.amount || 0,
             currency: checkoutSession.currency || "usd",
+            merchant_id: checkoutSession.merchant_id,
           }),
         },
       );
 
-      const { shared_payment_token } = await tokenResponse.json();
+      const { shared_payment_token, status: paymentStatus } = await tokenResponse.json();
 
       if (!shared_payment_token) {
-        throw new Error("Failed to create shared payment token");
+        throw new Error("Failed to create payment");
       }
 
-      setStatus("completed");
-      onComplete(shared_payment_token);
+      // Check if payment was successful
+      if (paymentStatus === "succeeded") {
+        setStatus("completed");
+        onComplete(shared_payment_token);
+      } else if (paymentStatus === "requires_action") {
+        // Handle 3D Secure or other authentication requirements
+        throw new Error("Payment requires additional authentication. Please try a different card.");
+      } else {
+        throw new Error(`Payment failed with status: ${paymentStatus}`);
+      }
     } catch (err: any) {
       console.error("Checkout error:", err);
       setError(err.message || "Payment failed");
@@ -172,7 +158,7 @@ function CheckoutForm({
             <h4 className="font-medium mb-2">Order Summary</h4>
             {checkoutSession.line_items?.map((item: any, index: number) => (
               <div key={index} className="flex justify-between text-sm">
-                <span>{item.item?.id || "Service"}</span>
+                <span>{item.item?.name || item.item?.id || "Service"}</span>
                 <span>{formatPrice(item.total, currency)}</span>
               </div>
             ))}
@@ -187,9 +173,20 @@ function CheckoutForm({
           {/* Payment Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="p-4 border rounded-lg">
-              <PaymentElement
+              <CardElement
                 options={{
-                  layout: "tabs",
+                  style: {
+                    base: {
+                      fontSize: '16px',
+                      color: '#424770',
+                      '::placeholder': {
+                        color: '#aab7c4',
+                      },
+                    },
+                    invalid: {
+                      color: '#9e2146',
+                    },
+                  },
                 }}
               />
             </div>
@@ -238,40 +235,6 @@ export default function CheckoutUI({
   onComplete,
   onCancel,
 }: CheckoutUIProps) {
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Only create SetupIntent if checkoutSession is available
-    if (!checkoutSession) {
-      return;
-    }
-
-    // Create SetupIntent when component mounts
-    const createSetupIntent = async () => {
-      try {
-        const response = await fetch("/api/stripe/create-setup-intent", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            customer_email: checkoutSession?.contact?.email,
-            amount:
-              checkoutSession?.totals?.find((t: any) => t.type === "total")
-                ?.amount || 0,
-            currency: checkoutSession?.currency || "usd",
-          }),
-        });
-
-        const { client_secret } = await response.json();
-        setClientSecret(client_secret);
-      } catch (error) {
-        console.error("Failed to create setup intent:", error);
-      }
-    };
-
-    createSetupIntent();
-  }, [checkoutSession]);
 
   // Early return if checkoutSession is not available
   if (!checkoutSession) {
@@ -290,17 +253,7 @@ export default function CheckoutUI({
     );
   }
 
-  if (!clientSecret) {
-    return (
-      <div className="flex items-center justify-center p-6">
-        <Loader2 className="w-6 h-6 animate-spin mr-2" />
-        <span>Loading payment form...</span>
-      </div>
-    );
-  }
-
   const options = {
-    clientSecret,
     appearance: {
       theme: "stripe" as const,
       variables: {
