@@ -34,16 +34,18 @@ export class OAuthManager {
           "PAYMENTS_WRITE",
         ],
         authorizationUrl:
-          process.env.NODE_ENV === "production"
-            ? "https://connect.squareup.com/oauth2/authorize"
-            : "https://connect.squareupsandbox.com/oauth2/authorize",
-        tokenUrl:
-          process.env.NODE_ENV === "production"
-            ? "https://connect.squareup.com/oauth2/token"
-            : "https://connect.squareupsandbox.com/oauth2/token",
-        environment: (process.env.NODE_ENV === "production"
-          ? "production"
-          : "sandbox") as "production" | "sandbox",
+          "https://connect.squareupsandbox.com/oauth2/authorize",
+        // process.env.NODE_ENV === "production"
+        //   ? "https://connect.squareup.com/oauth2/authorize"
+        //   : "https://connect.squareupsandbox.com/oauth2/authorize",
+        tokenUrl: "https://connect.squareupsandbox.com/oauth2/token",
+        // process.env.NODE_ENV === "production"
+        //   ? "https://connect.squareup.com/oauth2/token"
+        //   : "https://connect.squareupsandbox.com/oauth2/token",
+        environment: "sandbox" as const,
+        // (process.env.NODE_ENV === "production"
+        //   ? "production"
+        //   : "sandbox") as "production" | "sandbox",
       };
       this.providers.set("square", new SquareOAuthProvider(squareConfig));
     }
