@@ -14,20 +14,25 @@ export default function Home() {
             acp-use
           </Link>
           <div className="flex items-center gap-6">
-            <a
-              href="https://developers.openai.com/commerce/specs/checkout"
-              target="_blank"
+            <Link
+              href="/demo"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Live Demo
+            </Link>
+            <Link
+              href="/#how-it-works"
               rel="noreferrer"
               className="text-gray-600 hover:text-gray-900 transition-colors"
             >
-              ACP Spec
-            </a>
-            <a
-              href="mailto:founders@acp-use.com?subject=ACP%20Adapter%20Demo"
+              How it works
+            </Link>
+            <Link
+              href="/auth/sign-up"
               className="inline-flex h-9 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
             >
-              Book a Demo
-            </a>
+              Get started
+            </Link>
           </div>
         </div>
       </nav>
@@ -47,8 +52,8 @@ export default function Home() {
               The Universal Adapter
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              We connect any booking system to any AI platform. One integration,
-              infinite possibilities.
+              We connect any e-commerce platform to any AI platform. One
+              integration, infinite possibilities.
             </p>
           </div>
 
@@ -59,23 +64,23 @@ export default function Home() {
       </div>
 
       {/* Features Section */}
-      <div className="relative py-20 z-10">
+      <div className="relative py-20 z-10" id="how-it-works">
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               How it works for your business
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Connect your existing booking system once, and suddenly your
-              salon, gym, or clinic becomes bookable through AI. No technical
-              knowledge required.
+              Connect your existing e-commerce store once, and suddenly your
+              products become discoverable and purchasable through AI. No
+              technical knowledge required.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <FeatureCard
-              title="Connect Any System"
-              description="Works with Square, Mindbody, Acuity, or any booking platform. We handle all the technical integration behind the scenes."
+              title="Connect Any Store"
+              description="Works with Shopify, WooCommerce, Square, or any e-commerce platform. We handle all the technical integration behind the scenes."
               icon="🔌"
             />
             <FeatureCard
@@ -85,7 +90,7 @@ export default function Home() {
             />
             <FeatureCard
               title="Appear in AI Results"
-              description="When customers ask AI for services in your area, your business shows up as a bookable option instantly."
+              description="When customers ask AI for products, your store shows up as a purchasable option instantly."
               icon="🤖"
             />
           </div>
@@ -96,18 +101,18 @@ export default function Home() {
       <div className="relative bg-blue-600 py-20 z-10">
         <div className="mx-auto max-w-4xl text-center px-6">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to get more bookings through AI?
+            Ready to get more sales through AI?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Connect your existing booking system and start getting bookings from
+            Connect your existing e-commerce store and start getting sales from
             ChatGPT, Claude, and other AI platforms today.
           </p>
-          <a
-            href="mailto:founders@acp-use.com?subject=ACP%20Adapter%20Demo"
+          <Link
+            href="/auth/sign-up"
             className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-8 text-base font-semibold text-blue-600 hover:bg-gray-50 transition-colors"
           >
-            Book a Demo
-          </a>
+            Get started
+          </Link>
         </div>
       </div>
 

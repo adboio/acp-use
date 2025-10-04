@@ -13,18 +13,33 @@ export async function POST(
   const requestId = request.headers.get("Request-Id") ?? undefined;
   const idempotencyKey = request.headers.get("Idempotency-Key") ?? undefined;
 
-  console.log("merchant_id", merchant_id);
+  console.log(
+    "🛒 [ACP-CREATE] Creating checkout session for merchant:",
+    merchant_id,
+  );
+  console.log("🛒 [ACP-CREATE] Request headers:", {
+    requestId,
+    idempotencyKey,
+    contentType: request.headers.get("content-type"),
+  });
 
   let items: ItemInput[] = [];
   try {
     const body = await request.json();
+    console.log("🛒 [ACP-CREATE] Request body:", JSON.stringify(body, null, 2));
+
     if (Array.isArray(body?.items)) {
       items = body.items.filter(
         (it: any): it is ItemInput =>
           typeof it?.id === "string" && Number.isFinite(it?.quantity),
       );
+      console.log(
+        "🛒 [ACP-CREATE] Parsed items:",
+        JSON.stringify(items, null, 2),
+      );
     }
-  } catch {
+  } catch (error) {
+    console.error("❌ [ACP-CREATE] Error parsing request body:", error);
     // ignore parse errors and fall back to empty items
   }
 
@@ -145,5 +160,9 @@ export async function POST(
   if (idempotencyKey) headers.set("Idempotency-Key", idempotencyKey);
   if (requestId) headers.set("Request-Id", requestId);
 
+  console.log(
+    "🛒 [ACP-CREATE] Returning checkout session:",
+    JSON.stringify(checkout_session, null, 2),
+  );
   return NextResponse.json(checkout_session, { status: 201, headers });
 }

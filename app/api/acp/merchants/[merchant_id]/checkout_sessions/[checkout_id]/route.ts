@@ -119,3 +119,53 @@ export async function GET(
 
   return NextResponse.json(checkout_session, { status: 200, headers });
 }
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ merchant_id: string; checkout_id: string }> },
+) {
+  const { merchant_id, checkout_id } = await params;
+  const requestId = request.headers.get("Request-Id") ?? undefined;
+  const idempotencyKey = request.headers.get("Idempotency-Key") ?? undefined;
+
+  console.log("📝 [ACP-UPDATE] Updating checkout session:", checkout_id);
+  console.log("📝 [ACP-UPDATE] Merchant:", merchant_id);
+  console.log("📝 [ACP-UPDATE] Request headers:", {
+    requestId,
+    idempotencyKey,
+    contentType: request.headers.get("content-type"),
+  });
+
+  let updateData: any = {};
+  try {
+    const body = await request.json();
+    console.log("📝 [ACP-UPDATE] Request body:", JSON.stringify(body, null, 2));
+    updateData = body;
+  } catch (error) {
+    console.error("❌ [ACP-UPDATE] Error parsing request body:", error);
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 },
+    );
+  }
+
+  // Mock update response
+  const updated_session = {
+    id: checkout_id,
+    status: "ready_for_payment",
+    fulfillment_option_id: updateData.fulfillment_option_id,
+    contact: updateData.contact,
+    notes: updateData.notes,
+    updated_at: new Date().toISOString(),
+  };
+
+  const headers = new Headers();
+  if (idempotencyKey) headers.set("Idempotency-Key", idempotencyKey);
+  if (requestId) headers.set("Request-Id", requestId);
+
+  console.log(
+    "📝 [ACP-UPDATE] Returning updated session:",
+    JSON.stringify(updated_session, null, 2),
+  );
+  return NextResponse.json(updated_session, { status: 200, headers });
+}

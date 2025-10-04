@@ -66,7 +66,7 @@ export type Database = {
           created_at: string;
           credentials: Json | null;
           id: number;
-          merchant_id: number | null;
+          merchant_id: string | null;
           provider: Database["public"]["Enums"]["merchant_connector"] | null;
           status: Database["public"]["Enums"]["connector_status"] | null;
           updated_at: string | null;
@@ -76,7 +76,7 @@ export type Database = {
           created_at?: string;
           credentials?: Json | null;
           id?: number;
-          merchant_id?: number | null;
+          merchant_id?: string | null;
           provider?: Database["public"]["Enums"]["merchant_connector"] | null;
           status?: Database["public"]["Enums"]["connector_status"] | null;
           updated_at?: string | null;
@@ -86,7 +86,7 @@ export type Database = {
           created_at?: string;
           credentials?: Json | null;
           id?: number;
-          merchant_id?: number | null;
+          merchant_id?: string | null;
           provider?: Database["public"]["Enums"]["merchant_connector"] | null;
           status?: Database["public"]["Enums"]["connector_status"] | null;
           updated_at?: string | null;
@@ -96,7 +96,7 @@ export type Database = {
             foreignKeyName: "merchant_connectors_merchant_id_fkey";
             columns: ["merchant_id"];
             isOneToOne: false;
-            referencedRelation: "merchant_users";
+            referencedRelation: "merchants";
             referencedColumns: ["id"];
           },
         ];
@@ -141,6 +141,7 @@ export type Database = {
           stripe_onboarding_type: string | null;
           stripe_payouts_enabled: boolean | null;
           updated_at: string | null;
+          user_id: string | null;
         };
         Insert: {
           created_at?: string;
@@ -152,6 +153,7 @@ export type Database = {
           stripe_onboarding_type?: string | null;
           stripe_payouts_enabled?: boolean | null;
           updated_at?: string | null;
+          user_id?: string | null;
         };
         Update: {
           created_at?: string;
@@ -163,6 +165,7 @@ export type Database = {
           stripe_onboarding_type?: string | null;
           stripe_payouts_enabled?: boolean | null;
           updated_at?: string | null;
+          user_id?: string | null;
         };
         Relationships: [];
       };
