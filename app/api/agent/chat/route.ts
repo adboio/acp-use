@@ -287,38 +287,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the merchant ID from authentication
+    // Get the merchant ID from authentication or use default for demo
     const supabase = await createClient();
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
 
+    let merchantId: string;
+
     if (userError || !user) {
-      console.error("❌ [CHAT] User not authenticated:", userError);
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 },
+      // No user authenticated - use default merchant ID for demo
+      console.log(
+        "🤖 [CHAT] No user authenticated, using default merchant ID for demo",
+      );
+      merchantId = "8343c47b-3bd4-4ae7-b66b-fb69458c7f51";
+    } else {
+      // User is authenticated - get their merchant ID
+      const { data: merchant, error: merchantError } = await supabase
+        .from("merchants")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (merchantError || !merchant) {
+        console.error(
+          "❌ [CHAT] Merchant not found for authenticated user:",
+          merchantError,
+        );
+        return NextResponse.json(
+          { error: "Merchant account not found" },
+          { status: 404 },
+        );
+      }
+
+      merchantId = merchant.id;
+      console.log(
+        "🤖 [CHAT] Using authenticated user's merchant ID:",
+        merchantId,
       );
     }
-
-    // Get the merchant ID for the current user
-    const { data: merchant, error: merchantError } = await supabase
-      .from("merchants")
-      .select("id")
-      .eq("user_id", user.id)
-      .single();
-
-    if (merchantError || !merchant) {
-      console.error("❌ [CHAT] Merchant not found:", merchantError);
-      return NextResponse.json(
-        { error: "Merchant account not found" },
-        { status: 404 },
-      );
-    }
-
-    const merchantId = merchant.id;
-    console.log("🤖 [CHAT] Using merchant ID:", merchantId);
 
     // Fetch product feed at the start to give AI context
     let productFeed = null;
